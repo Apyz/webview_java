@@ -1,3 +1,7 @@
+# Changes in this fork
+- Reverted some binaries to fix bug on windows
+- Get it from here: https://jitpack.io/#Osiris-Team/webview_java
+
 # Webview
 
 The Java port of the [webview project](https://github.com/webview/webview). It uses JNA and auto-extracts the required dll/dylib/so libraries for your current system.
