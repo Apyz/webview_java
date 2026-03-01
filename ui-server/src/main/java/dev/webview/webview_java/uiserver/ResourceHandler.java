@@ -30,15 +30,13 @@ import co.casterlabs.rhs.protocol.StandardHttpStatus;
 import co.casterlabs.rhs.server.HttpResponse;
 import co.casterlabs.rhs.session.HttpSession;
 import co.casterlabs.rhs.util.MimeTypes;
-import lombok.AllArgsConstructor;
-import lombok.NonNull;
-
-/**
- * A handler that serves UI files out of your jar.
- */
-@AllArgsConstructor
 public class ResourceHandler implements Function<HttpSession, HttpResponse> {
-    private final @NonNull String resourceBase;
+    private final String resourceBase;
+
+    public ResourceHandler(String resourceBase) {
+        if (resourceBase == null) throw new NullPointerException("resourceBase is marked non-null but is null");
+        this.resourceBase = resourceBase;
+    }
 
     public ResourceHandler() {
         this("");

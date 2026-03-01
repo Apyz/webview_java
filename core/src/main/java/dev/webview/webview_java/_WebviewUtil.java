@@ -26,11 +26,10 @@ package dev.webview.webview_java;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import lombok.NonNull;
-
 class _WebviewUtil {
 
-    static String getExceptionStack(@NonNull Throwable e) {
+    static String getExceptionStack(Throwable e) {
+        if (e == null) throw new NullPointerException("e is marked non-null but is null");
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
 
@@ -47,7 +46,8 @@ class _WebviewUtil {
             .replace("\r", "");
     }
 
-    static String jsonEscape(@NonNull String input) {
+    static String jsonEscape(String input) {
+        if (input == null) throw new NullPointerException("input is marked non-null but is null");
         char[] chars = input.toCharArray();
 
         StringBuilder output = new StringBuilder();
@@ -111,7 +111,8 @@ class _WebviewUtil {
         return output.toString();
     }
 
-    static String forceSafeChars(@NonNull String input) {
+    static String forceSafeChars(String input) {
+        if (input == null) throw new NullPointerException("input is marked non-null but is null");
         char[] chars = input.toCharArray();
 
         StringBuilder output = new StringBuilder();

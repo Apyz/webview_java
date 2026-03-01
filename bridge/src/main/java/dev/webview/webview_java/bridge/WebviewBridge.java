@@ -41,7 +41,6 @@ import co.casterlabs.rakurai.json.element.JsonNull;
 import co.casterlabs.rakurai.json.element.JsonObject;
 import co.casterlabs.rakurai.json.element.JsonString;
 import dev.webview.webview_java.Webview;
-import lombok.NonNull;
 
 public class WebviewBridge {
     private static String bridgeScript = "";
@@ -56,7 +55,8 @@ public class WebviewBridge {
     Map<String, JavascriptObject> objects = new HashMap<>();
     Webview webview;
 
-    public WebviewBridge(@NonNull Webview webview) {
+    public WebviewBridge(Webview webview) {
+        if (webview == null) throw new NullPointerException("webview is marked non-null but is null");
         this.webview = webview;
 
         this.webview.bind("__bridgeInternal", (rawArgs) -> {
@@ -120,12 +120,16 @@ public class WebviewBridge {
         this.webview.setInitScript(String.join("\n\n", init), false);
     }
 
-    public void defineObject(@NonNull String name, @NonNull JavascriptObject obj) {
+    public void defineObject(String name, JavascriptObject obj) {
+        if (name == null) throw new NullPointerException("name is marked non-null but is null");
+        if (obj == null) throw new NullPointerException("obj is marked non-null but is null");
         this.webview.eval(String.join("\n", obj.getInitLines(name, this)));
         this.rebuildInitScript();
     }
 
-    public void emit(@NonNull String type, @NonNull JsonElement data) {
+    public void emit(String type, JsonElement data) {
+        if (type == null) throw new NullPointerException("type is marked non-null but is null");
+        if (data == null) throw new NullPointerException("data is marked non-null but is null");
         this.webview.eval(
             String.format(
                 "window.Bridge.__internal.broadcast(%s,%s);",

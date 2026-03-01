@@ -41,20 +41,12 @@ import co.casterlabs.rakurai.json.element.JsonElement;
 import co.casterlabs.rakurai.json.element.JsonString;
 import co.casterlabs.rakurai.json.serialization.JsonParseException;
 import dev.webview.webview_java.bridge.util.ReflectionFieldMutationListener;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.SneakyThrows;
-
-/**
- * Allows you to expose a Java object to Javascript
- * 
- * @see JavascriptFunction
- * @see JavascriptGetter
- * @see JavascriptSetter
- * @see JavascriptValue
- */
 public abstract class JavascriptObject {
-    private @Getter String id = UUID.randomUUID().toString();
+    private String id = UUID.randomUUID().toString();
+
+    public String getId() {
+        return this.id;
+    }
 
     private Map<String, FieldMapping> properties = new HashMap<>();
     private Map<String, MethodMapping> functions = new HashMap<>();
@@ -64,9 +56,9 @@ public abstract class JavascriptObject {
     @SuppressWarnings("unused")
     private String name;
 
-    @SneakyThrows
     public JavascriptObject() {
-        for (Field field : this.getClass().getDeclaredFields()) {
+        try {
+            for (Field field : this.getClass().getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers())) continue;
 
             if (JavascriptObject.class.isAssignableFrom(field.getType())) {
@@ -132,14 +124,17 @@ public abstract class JavascriptObject {
                 mapping.setter = method;
             }
         }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     List<String> getInitLines(String name, WebviewBridge bridge) {
         return this.getInitLines(name, bridge, null);
     }
 
-    @SneakyThrows
     private List<String> getInitLines(String name, WebviewBridge bridge, @Nullable JavascriptObject parent) {
+        try {
         this.bridge = bridge;
         this.name = name;
 
@@ -176,10 +171,14 @@ public abstract class JavascriptObject {
         }
 
         return linesToExecute;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @Nullable
-    JsonElement get(@NonNull String property, @NonNull WebviewBridge bridge) throws Throwable {
+    JsonElement get(String property, WebviewBridge bridge) throws Throwable {
+        if (property == null) throw new NullPointerException("property is marked non-null but is null");
+        if (bridge == null) throw new NullPointerException("bridge is marked non-null but is null");
         try {
             FieldMapping mapping = this.properties.get(property);
             assert mapping != null : "Could not find property: " + property;
@@ -190,7 +189,9 @@ public abstract class JavascriptObject {
         }
     }
 
-    void set(@NonNull String property, JsonElement value, @NonNull WebviewBridge bridge) throws Throwable {
+    void set(String property, JsonElement value, WebviewBridge bridge) throws Throwable {
+        if (property == null) throw new NullPointerException("property is marked non-null but is null");
+        if (bridge == null) throw new NullPointerException("bridge is marked non-null but is null");
         try {
             FieldMapping mapping = this.properties.get(property);
             assert mapping != null : "Could not find property: " + property;
@@ -201,8 +202,10 @@ public abstract class JavascriptObject {
         }
     }
 
-    @Nullable
-    JsonElement invoke(@NonNull String function, @NonNull JsonArray arguments, @NonNull WebviewBridge bridge) throws Throwable {
+    JsonElement invoke(String function, JsonArray arguments, WebviewBridge bridge) throws Throwable {
+        if (function == null) throw new NullPointerException("function is marked non-null but is null");
+        if (arguments == null) throw new NullPointerException("arguments is marked non-null but is null");
+        if (bridge == null) throw new NullPointerException("bridge is marked non-null but is null");
         try {
             MethodMapping mapping = this.functions.get(function);
             assert mapping != null : "Could not find function: " + function;
@@ -223,7 +226,9 @@ public abstract class JavascriptObject {
             this.method = method;
         }
 
-        public @Nullable JsonElement invoke(@NonNull JsonArray arguments, @NonNull WebviewBridge bridge) throws Exception {
+        public JsonElement invoke(JsonArray arguments, WebviewBridge bridge) throws Exception {
+            if (arguments == null) throw new NullPointerException("arguments is marked non-null but is null");
+            if (bridge == null) throw new NullPointerException("bridge is marked non-null but is null");
             Class<?>[] argTypes = method.getParameterTypes();
             assert argTypes.length == arguments.size() : "The invoking arguments do not match the expected length: " + argTypes.length;
 
@@ -245,8 +250,8 @@ public abstract class JavascriptObject {
     }
 
     private static class FieldMapping {
-        private @NonNull Object $i;
-        private @NonNull String $name;
+        private Object $i;
+        private String $name;
 
         private Method getter;
         private Method setter;
@@ -258,7 +263,9 @@ public abstract class JavascriptObject {
             this.$name = name;
         }
 
-        public void set(@NonNull JsonElement v, @NonNull WebviewBridge bridge) throws Exception {
+        public void set(JsonElement v, WebviewBridge bridge) throws Exception {
+            if (v == null) throw new NullPointerException("v is marked non-null but is null");
+            if (bridge == null) throw new NullPointerException("bridge is marked non-null but is null");
             if (this.setter != null) {
                 Object o = null;
 

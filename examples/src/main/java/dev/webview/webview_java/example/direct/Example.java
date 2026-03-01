@@ -16,7 +16,7 @@ public class Example {
         //wv.setSize(800, 600);
 
         // load a URL
-        wv.loadURL("https://google.com");
+        wv.loadURL("https://www.google.com");
 
         /*
 

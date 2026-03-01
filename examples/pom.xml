@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>dev.webview.webview_java</groupId>
 		<artifactId>webview_java</artifactId>
-		<version>PLACEHOLDER</version>
+		<version>1.0.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 

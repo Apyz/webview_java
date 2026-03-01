@@ -38,27 +38,29 @@ import co.casterlabs.rhs.server.HttpServerBuilder;
 import co.casterlabs.rhs.session.HttpSession;
 import co.casterlabs.rhs.session.WebsocketListener;
 import co.casterlabs.rhs.session.WebsocketSession;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
-import lombok.SneakyThrows;
-import lombok.experimental.Accessors;
-
-/**
- * Serves files to the local machine, useful for bundling your own UI with your
- * Webview application.
- */
-@Accessors(chain = true)
 public class UIServer implements Closeable {
-    private @Setter Function<HttpSession, HttpResponse> handler;
+    private Function<HttpSession, HttpResponse> handler;
 
     private HttpServer server;
 
-    private @Getter int port;
-    private @Getter String localAddress;
+    private int port;
+    private String localAddress;
 
-    @SneakyThrows
+    public UIServer setHandler(Function<HttpSession, HttpResponse> handler) {
+        this.handler = handler;
+        return this;
+    }
+
+    public int getPort() {
+        return this.port;
+    }
+
+    public String getLocalAddress() {
+        return this.localAddress;
+    }
+
     public UIServer() {
+        try {
         String hostname = "localhost";
 
         // Find a random port.
@@ -75,7 +77,8 @@ public class UIServer implements Closeable {
             .withPort(this.port)
             .build(new HttpListener() {
                 @Override
-                public @Nullable HttpResponse serveHttpSession(@NonNull HttpSession session) {
+                public @Nullable HttpResponse serveHttpSession(HttpSession session) {
+                    if (session == null) throw new NullPointerException("session is marked non-null but is null");
                     if (handler == null) {
                         return null;
                     } else {
@@ -84,10 +87,13 @@ public class UIServer implements Closeable {
                 }
 
                 @Override
-                public @Nullable WebsocketListener serveWebsocketSession(@NonNull WebsocketSession session) {
+                public @Nullable WebsocketListener serveWebsocketSession(WebsocketSession session) {
                     return null; // Drop
                 }
             });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public UIServer start() throws IOException {

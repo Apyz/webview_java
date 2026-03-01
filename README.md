@@ -1,6 +1,23 @@
 # Changes in this fork
+[English](./README.md) | [中文版](./README_CN.md)
+
 - Reverted some binaries to fix bug on windows
 - Get it from here: https://jitpack.io/#Osiris-Team/webview_java
+
+## Fixes in this Workspace (Local Update)
+To resolve compilation and compatibility issues in modern Java environments (specifically **JDK 25**), the following changes were implemented:
+
+1.  **Removed Lombok Dependency**: 
+    - Replaced all Lombok annotations (`@Getter`, `@Setter`, `@NonNull`, `@SneakyThrows`, etc.) with standard Java code.
+    - This eliminates the need for the Lombok IDE plugin and fixes the "Fatal error compiling" issues seen on newer JDKs where Lombok hasn't yet caught up.
+2.  **Corrected Module Versioning**:
+    - Replaced all `PLACEHOLDER` version strings in `pom.xml` files with a concrete version (`1.0.0`). 
+    - This allows Maven and IDEs to correctly resolve internal module dependencies (`core`, `bridge`, etc.).
+3.  **Improved Java 11/25 Compatibility**:
+    - Refactored constructors in `Webview.java` to ensure compliance with Java 11 standards (preventing statements before `this()` calls).
+    - Added explicit null checks and robust `try-catch` blocks to replace previous annotation-driven logic.
+4.  **Verified Build Process**:
+    - The project now builds successfully using standard Maven commands: `mvn clean compile`.
 
 # Webview
 
@@ -21,24 +38,24 @@ The Java port of the [webview project](https://github.com/webview/webview). It u
 
 <table width=300>
     <tr>
-        <td align="right" width=64>
-            <img src="https://simpleicons.org/icons/windows.svg" title="Windows" width="32" height="32">
+        <td align="right" width=100>
+            Windows
         </td>
         <td align="left">
             x86, x86_64
         </td>
     </tr>
     <tr>
-        <td align="right" width=64>
-            <img src="https://simpleicons.org/icons/apple.svg" title="macOS" width="32" height="32">
+        <td align="right" width=100>
+            macOS
         </td>
         <td align="left">
             aarch64, x86_64
         </td>
     </tr>
     <tr>
-        <td align="right" width=64>
-            <img src="https://simpleicons.org/icons/linux.svg" title="Linux" width="32" height="32">
+        <td align="right" width=100>
+            Linux
         </td>
         <td align="left">
             x86, x86_64, arm, aarch64

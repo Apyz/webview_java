@@ -39,7 +39,6 @@ import com.sun.jna.ptr.PointerByReference;
 
 import co.casterlabs.commons.platform.Platform;
 import dev.webview.webview_java.WebviewNative.BindCallback;
-import lombok.NonNull;
 
 public class Webview implements Closeable, Runnable {
 
@@ -118,7 +117,7 @@ public class Webview implements Closeable, Runnable {
      * 
      * @see          #Webview(boolean, PointerByReference, int, int)
      */
-    public Webview(boolean debug, @NonNull Component target) {
+    public Webview(boolean debug, Component target) {
         this(debug, new PointerByReference(Native.getComponentPointer(target)));
     }
 
@@ -163,7 +162,8 @@ public class Webview implements Closeable, Runnable {
 //        this.eval(this.initScript);
     }
 
-    public void setTitle(@NonNull String title) {
+    public void setTitle(String title) {
+        if (title == null) throw new NullPointerException("title is marked non-null but is null");
         N.webview_set_title($pointer, title);
     }
 
@@ -192,7 +192,8 @@ public class Webview implements Closeable, Runnable {
      * 
      * @see             #setInitScript(String, boolean)
      */
-    public void setInitScript(@NonNull String script) {
+    public void setInitScript(String script) {
+        if (script == null) throw new NullPointerException("script is marked non-null but is null");
         this.setInitScript(script, false);
     }
 
@@ -205,7 +206,8 @@ public class Webview implements Closeable, Runnable {
      * @param    allowNestedAccess whether or not to inject the script into nested
      *                             iframes.
      */
-    public void setInitScript(@NonNull String script, boolean allowNestedAccess) {
+    public void setInitScript(String script, boolean allowNestedAccess) {
+        if (script == null) throw new NullPointerException("script is marked non-null but is null");
         script = String.format(
             "(() => {\n"
                 + "try {\n"
@@ -229,7 +231,8 @@ public class Webview implements Closeable, Runnable {
      * 
      * @param script
      */
-    public void eval(@NonNull String script) {
+    public void eval(String script) {
+        if (script == null) throw new NullPointerException("script is marked non-null but is null");
         this.dispatch(() -> {
             N.webview_eval(
                 $pointer,
@@ -263,7 +266,9 @@ public class Webview implements Closeable, Runnable {
      *                   which is of type JsonElement (can be null). Exceptions are
      *                   automatically passed back to JavaScript.
      */
-    public void bind(@NonNull String name, @NonNull WebviewBindCallback handler) {
+    public void bind(String name, WebviewBindCallback handler) {
+        if (name == null) throw new NullPointerException("name is marked non-null but is null");
+        if (handler == null) throw new NullPointerException("handler is marked non-null but is null");
         N.webview_bind($pointer, name, new BindCallback() {
             @Override
             public void callback(long seq, String req, long arg) {
@@ -292,7 +297,8 @@ public class Webview implements Closeable, Runnable {
      * 
      * @param name The name of the function.
      */
-    public void unbind(@NonNull String name) {
+    public void unbind(String name) {
+        if (name == null) throw new NullPointerException("name is marked non-null but is null");
         N.webview_unbind($pointer, name);
     }
 
@@ -302,7 +308,8 @@ public class Webview implements Closeable, Runnable {
      * @deprecated Use this only if you absolutely know what you're doing.
      */
     @Deprecated
-    public void dispatch(@NonNull Runnable handler) {
+    public void dispatch(Runnable handler) {
+        if (handler == null) throw new NullPointerException("handler is marked non-null but is null");
         N.webview_dispatch($pointer, ($pointer, arg) -> {
             handler.run();
         }, 0);

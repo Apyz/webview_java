@@ -7,18 +7,10 @@ import java.awt.Graphics;
 import java.io.Closeable;
 import java.util.function.Consumer;
 
-import lombok.Getter;
-import lombok.Setter;
-
-/**
- * An AWT component a which will automatically initialize the webview when it's
- * considered "drawable".
- * 
- */
 public class AWTWebview extends Canvas implements Closeable {
     private static final long serialVersionUID = 5199512256429931156L;
 
-    private @Getter Webview webview;
+    private Webview webview;
     private final boolean debug;
 
     private Dimension lastSize = null;
@@ -26,9 +18,21 @@ public class AWTWebview extends Canvas implements Closeable {
     /**
      * The callback handler for when the Webview gets created.
      */
-    private @Setter Consumer<Webview> onInitialized;
+    private Consumer<Webview> onInitialized;
 
-    private @Getter boolean initialized = false;
+    private boolean initialized = false;
+
+    public Webview getWebview() {
+        return this.webview;
+    }
+
+    public void setOnInitialized(Consumer<Webview> onInitialized) {
+        this.onInitialized = onInitialized;
+    }
+
+    public boolean isInitialized() {
+        return this.initialized;
+    }
 
     public AWTWebview() {
         this(false);

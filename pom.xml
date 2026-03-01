@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dev.webview.webview_java</groupId>
 	<artifactId>webview_java</artifactId>
-	<version>PLACEHOLDER</version>
+	<version>1.0.0</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -50,12 +50,6 @@
 	</build>
 
 	<dependencies>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.18.30</version>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<!-- For Eclipse users -->
 			<groupId>org.jetbrains</groupId>

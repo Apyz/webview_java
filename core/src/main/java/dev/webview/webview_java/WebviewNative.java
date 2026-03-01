@@ -39,79 +39,80 @@ import com.sun.jna.ptr.PointerByReference;
 import co.casterlabs.commons.io.streams.StreamUtil;
 import co.casterlabs.commons.platform.LinuxLibC;
 import co.casterlabs.commons.platform.Platform;
-import lombok.NonNull;
-import lombok.SneakyThrows;
 
 interface WebviewNative extends Library {
     static final WebviewNative N = runSetup();
 
-    @SneakyThrows
     private static WebviewNative runSetup() {
-        String[] libraries = null;
+        try {
+            String[] libraries = null;
 
-        switch (Platform.osDistribution) {
-            case LINUX: {
-                if (LinuxLibC.isGNU()) {
-                    libraries = new String[] {
-                            "/dev/webview/webview_java/natives/" + Platform.archTarget + "/linux/gnu/libwebview.so"
-                    };
-                } else {
-                    libraries = new String[] {
-                            "/dev/webview/webview_java/natives/" + Platform.archTarget + "/linux/musl/libwebview.so"
-                    };
+            switch (Platform.osDistribution) {
+                case LINUX: {
+                    if (LinuxLibC.isGNU()) {
+                        libraries = new String[] {
+                                "/dev/webview/webview_java/natives/" + Platform.archTarget + "/linux/gnu/libwebview.so"
+                        };
+                    } else {
+                        libraries = new String[] {
+                                "/dev/webview/webview_java/natives/" + Platform.archTarget + "/linux/musl/libwebview.so"
+                        };
+                    }
+                    break;
                 }
-                break;
+
+                case MACOS: {
+                    libraries = new String[] {
+                            "/dev/webview/webview_java/natives/" + Platform.archTarget + "/macos/libwebview.dylib"
+                    };
+                    break;
+                }
+
+                case WINDOWS_NT: {
+                    libraries = new String[] {
+                            "/dev/webview/webview_java/natives/" + Platform.archTarget + "/windows_nt/webview2loader.dll",
+                            "/dev/webview/webview_java/natives/" + Platform.archTarget + "/windows_nt/webview.dll"
+                    };
+                    break;
+                }
+
+                default: {
+                    throw new IllegalStateException("Unsupported platform: " + Platform.osDistribution + ":" + Platform.archTarget);
+                }
             }
 
-            case MACOS: {
-                libraries = new String[] {
-                        "/dev/webview/webview_java/natives/" + Platform.archTarget + "/macos/libwebview.dylib"
-                };
-                break;
+            // Extract all of the libs.
+            for (String lib : libraries) {
+                File target = new File(System.getProperty("user.dir") + "/" + new File(lib).getName());
+                if (target.exists()) {
+                    target.delete();
+                }
+                target.deleteOnExit();
+
+                // Copy it to a file.
+                try (InputStream in = WebviewNative.class.getResourceAsStream(lib.toLowerCase())) {
+                    byte[] bytes = StreamUtil.toBytes(in);
+                    Files.write(target.toPath(), bytes);
+                } catch (Exception e) {
+                    if (e.getMessage().contains("used by another")) continue; // Ignore.
+
+                    System.err.println("Unable to extract native: " + lib + " to: " + target);
+                    throw e;
+                }
+
+                System.load(target.getAbsolutePath()); // Load it. This is so Native will be able to link it.
             }
 
-            case WINDOWS_NT: {
-                libraries = new String[] {
-                        "/dev/webview/webview_java/natives/" + Platform.archTarget + "/windows_nt/webview2loader.dll",
-                        "/dev/webview/webview_java/natives/" + Platform.archTarget + "/windows_nt/webview.dll"
-                };
-                break;
-            }
+            System.setProperty("jna.library.path", ".");
 
-            default: {
-                throw new IllegalStateException("Unsupported platform: " + Platform.osDistribution + ":" + Platform.archTarget);
-            }
+            return Native.load(
+                "webview",
+                WebviewNative.class,
+                Collections.singletonMap(Library.OPTION_STRING_ENCODING, "UTF-8")
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        // Extract all of the libs.
-        for (String lib : libraries) {
-            File target = new File(System.getProperty("user.dir")+"/"+ new File(lib).getName());
-            if (target.exists()) {
-                target.delete();
-            }
-            target.deleteOnExit();
-
-            // Copy it to a file.
-            try (InputStream in = WebviewNative.class.getResourceAsStream(lib.toLowerCase())) {
-                byte[] bytes = StreamUtil.toBytes(in);
-                Files.write(target.toPath(), bytes);
-            } catch (Exception e) {
-                if (e.getMessage().contains("used by another")) continue; // Ignore.
-
-                System.err.println("Unable to extract native: " + lib+" to: "+target);
-                throw e;
-            }
-
-            System.load(target.getAbsolutePath()); // Load it. This is so Native will be able to link it.
-        }
-
-        System.setProperty("jna.library.path", ".");
-
-        return Native.load(
-            "webview",
-            WebviewNative.class,
-            Collections.singletonMap(Library.OPTION_STRING_ENCODING, "UTF-8")
-        );
     }
 
     static final int WV_HINT_NONE = 0;
@@ -232,7 +233,7 @@ interface WebviewNative extends Library {
      * @param $pointer The instance pointer of the webview
      * @param js       The script to execute
      */
-    void webview_eval(long $pointer, @NonNull String js);
+    void webview_eval(long $pointer, String js);
 
     /**
      * Injects JavaScript code at the initialization of the new page.
@@ -242,7 +243,7 @@ interface WebviewNative extends Library {
      * @param    $pointer The instance pointer of the webview
      * @param    js       The script to execute
      */
-    void webview_init(long $pointer, @NonNull String js);
+    void webview_init(long $pointer, String js);
 
     /**
      * Binds a native callback so that it will appear under the given name as a
@@ -253,7 +254,7 @@ interface WebviewNative extends Library {
      * @param callback The callback to be called
      * @param arg      Unused
      */
-    void webview_bind(long $pointer, @NonNull String name, @NonNull BindCallback callback, long arg);
+    void webview_bind(long $pointer, String name, BindCallback callback, long arg);
 
     /**
      * Remove the native callback specified.
@@ -261,7 +262,7 @@ interface WebviewNative extends Library {
      * @param $pointer The instance pointer of the webview
      * @param name     The name of the callback
      */
-    void webview_unbind(long $pointer, @NonNull String name);
+    void webview_unbind(long $pointer, String name);
 
     /**
      * Allows to return a value from the native binding. Original request pointer
@@ -282,7 +283,7 @@ interface WebviewNative extends Library {
      * @param callback The callback to be called
      * @param arg      Unused
      */
-    void webview_dispatch(long $pointer, @NonNull DispatchCallback callback, long arg);
+    void webview_dispatch(long $pointer, DispatchCallback callback, long arg);
 
     /**
      * Returns the version info.
